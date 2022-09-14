@@ -21,6 +21,12 @@ func placementBindingMapper(c client.Client) handler.MapFunc {
 		object := obj.(*policiesv1.PlacementBinding)
 		var result []reconcile.Request
 
+		// no work if placementBinding has policy.open-cluster-management.io/experimental-controller-disable: "true" annotation
+		if value, ok := object.GetAnnotations()[policiesv1.PolicyDisableAnnotationkey]; ok && value == "true" {
+			log.V(2).Info("found a policy disable annotation in placementBinding, skipping it", "placementBinding", obj.GetName())
+			return nil
+		}
+
 		log := log.WithValues("placementBindingName", object.GetName(), "namespace", object.GetNamespace())
 
 		log.V(2).Info("Reconcile request for a PlacementBinding")

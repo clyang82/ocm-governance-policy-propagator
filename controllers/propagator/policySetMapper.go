@@ -9,11 +9,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	policiesv1 "open-cluster-management.io/governance-policy-propagator/api/v1"
 	policiesv1beta1 "open-cluster-management.io/governance-policy-propagator/api/v1beta1"
 )
 
 func policySetMapper(c client.Client) handler.MapFunc {
 	return func(object client.Object) []reconcile.Request {
+		// no work if policySet has policy.open-cluster-management.io/experimental-controller-disable: "true" annotation
+		if value, ok := object.GetAnnotations()[policiesv1.PolicyDisableAnnotationkey]; ok && value == "true" {
+			log.V(2).Info("found a policy disable annotation in policySet, skipping it", "policySet", object.GetName())
+			return nil
+		}
+
 		log := log.WithValues("policySetName", object.GetName(), "namespace", object.GetNamespace())
 		log.V(2).Info("Reconcile Request for PolicySet")
 

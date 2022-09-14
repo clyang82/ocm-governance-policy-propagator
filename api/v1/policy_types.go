@@ -109,6 +109,13 @@ type Policy struct {
 	Status PolicyStatus `json:"status,omitempty"`
 }
 
+const (
+	// PolicyDisableAnnotationkey is used to disable scheduling for a policy.
+	// It is a experimental flag to let policy controller ignore this policy,
+	// so other policy consumers can chime in.
+	PolicyDisableAnnotationkey = "policy.open-cluster-management.io/experimental-controller-disable"
+)
+
 //+kubebuilder:object:root=true
 
 // PolicyList contains a list of Policy

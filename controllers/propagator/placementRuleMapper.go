@@ -18,6 +18,12 @@ import (
 
 func placementRuleMapper(c client.Client) handler.MapFunc {
 	return func(object client.Object) []reconcile.Request {
+		// no work if placementRule has policy.open-cluster-management.io/experimental-controller-disable: "true" annotation
+		if value, ok := object.GetAnnotations()[policiesv1.PolicyDisableAnnotationkey]; ok && value == "true" {
+			log.V(2).Info("found a policy disable annotation in placementRule, skipping it", "placementRule", object.GetName())
+			return nil
+		}
+
 		log := log.WithValues("placementRuleName", object.GetName(), "namespace", object.GetNamespace())
 
 		log.V(2).Info("Reconcile Request for PlacementRule")
